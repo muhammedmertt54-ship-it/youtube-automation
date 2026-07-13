@@ -3,7 +3,6 @@ name: Process YouTube Video
 on:
   push:
     paths:
-      - "videos/video.mp4"
       - "videos/script.txt"
   workflow_dispatch:
 

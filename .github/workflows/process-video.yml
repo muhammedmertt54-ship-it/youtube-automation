@@ -32,7 +32,7 @@ jobs:
       - name: Seslendirme oluştur
         run: |
           edge-tts \
-            --voice en-US-GuyNeural \
+           --voice tr-TR-EmelNeural
             --rate=+0% \
             --file videos/script.txt \
             --write-media voice.mp3

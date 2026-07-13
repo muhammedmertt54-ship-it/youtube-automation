@@ -1,0 +1,63 @@
+name: Process YouTube Video
+
+on:
+  push:
+    paths:
+      - "videos/video.mp4"
+      - "videos/script.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  process-video:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dosyaları al
+        uses: actions/checkout@v6
+
+      - name: FFmpeg ve Edge TTS kur
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          pip install edge-tts
+
+      - name: Gerekli dosyaları kontrol et
+        run: |
+          test -f videos/video.mp4 || (echo "videos/video.mp4 bulunamadı" && exit 1)
+          test -f videos/script.txt || (echo "videos/script.txt bulunamadı" && exit 1)
+
+      - name: Seslendirme oluştur
+        run: |
+          edge-tts \
+            --voice en-US-GuyNeural \
+            --rate=+0% \
+            --file videos/script.txt \
+            --write-media voice.mp3
+
+      - name: Videoyu sesle birleştir
+        run: |
+          ffmpeg -y \
+            -stream_loop -1 \
+            -i videos/video.mp4 \
+            -i voice.mp3 \
+            -map 0:v:0 \
+            -map 1:a:0 \
+            -c:v libx264 \
+            -preset fast \
+            -crf 23 \
+            -c:a aac \
+            -b:a 192k \
+            -pix_fmt yuv420p \
+            -shortest \
+            final-video.mp4
+
+      - name: Son videoyu kaydet
+        uses: actions/upload-artifact@v7
+        with:
+          name: final-youtube-video
+          path: final-video.mp4
+          retention-days: 7

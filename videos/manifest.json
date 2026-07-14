@@ -1,45 +1,45 @@
 {
   "format": "short",
-  "title": "Uğur Böceklerinin Sırrı Nedir? 🐞",
-  "description": "Uğur böceklerinin üzerindeki o sevimli siyah beneklerin sırrını biliyor musunuz? Gelin, bu renkli dünyayı ve sevimli dostlarımızın gizemini birlikte keşfedelim!",
-  "script": "Merhaba minik kaşifler! Bugün doğanın en sevimli canlılarından biri olan uğur böceğini yakından tanımaya ne dersiniz? Peki, bu minik dostlarımızın üzerindeki kırmızı renk ve siyah benekler sadece süs mü dersiniz? Aslında hayır! Bu parlak kırmızı renk, kuşlara ve diğer avcılara 'Hey, ben çok lezzetsizim, beni sakın yeme!' mesajı verir. Benekler ise uğur böceğinin yaşını göstermez ama onların kendilerini korumasına ve diğer böcekleri korkutmasına yardım eder. Ayrıca uğur böcekleri bahçemizdeki zararlı böcekleri yiyerek bitkilerin sağlıklı kalmasını sağlar. Onlar doğanın gerçek kahramanlarıdır! Siz de bahçenizde bir uğur böceği görürseniz ona el sallamayı unutmayın! Bir sonraki maceramızda görüşmek üzere, hoşça kalın!",
-  "total_duration": 44,
+  "title": "Hop Zıplamayı Durduramıyor!",
+  "description": "Sevimli tavşan Hop o kadar çok zıplıyor ki bir türlü çiçeği koklamak için duramıyor. Lili ona çok eğlenceli bir durma dansı öğretiyor!",
+  "script": "Hop bugün o kadar heyecanlı ki, hiç durmadan zıplıyor! Hop! Neden durmuyorsun? Hop sevimli çiçeği koklamak istiyor ama pufff! Yine yukarı zıpladı! Duramıyorum Lili, bacaklarım tıp tıp zıplıyor! Lili’nin harika bir fikri var! Birlikte yeni bir oyun buluyorlar. Benimle tekrar et Hop: Zıpla, dön ve dur! Hop havada neşeyle dönüyor. Bakalım durabilecek mi? Zıpla, dön veeee... dur! İşte oldu! Hop tam çiçeğin önünde durmayı başardı. Başardın Hop! Harika durdun! Sevimli dostlar birlikte mis kokulu çiçeği kokluyorlar. Zıpla, dön ve dur! En güzel oyun bu!",
+  "total_duration": 46,
   "scenes": [
     {
       "scene_number": 1,
-      "narration": "Merhaba minik kaşifler! Bugün doğanın en sevimli canlılarından biri olan uğur böceğini yakından tanımaya ne dersiniz?",
+      "narration": "Hop bugün o kadar heyecanlı ki, hiç durmadan zıplıyor!",
       "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nMerhaba minik kaşifler! Bugün doğanın en sevimli canlılarından biri olan uğur böceğini yakından tanımaya ne dersiniz?\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHop bugün o kadar heyecanlı ki, hiç durmadan zıplıyor!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 2,
-      "narration": "Peki, bu minik dostlarımızın üzerindeki kırmızı renk ve siyah benekler sadece süs mü dersiniz? Aslında hayır!",
-      "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nPeki, bu minik dostlarımızın üzerindeki kırmızı renk ve siyah benekler sadece süs mü dersiniz? Aslında hayır!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Hop sevimli çiçeği koklamak istiyor ama pufff! Yine yukarı zıpladı!",
+      "duration": 8,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHop sevimli çiçeği koklamak istiyor ama pufff! Yine yukarı zıpladı!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 3,
-      "narration": "Bu parlak kırmızı renk, kuşlara ve diğer avcılara 'Hey, ben çok lezzetsizim, beni sakın yeme!' mesajı verir.",
-      "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nBu parlak kırmızı renk, kuşlara ve diğer avcılara 'Hey, ben çok lezzetsizim, beni sakın yeme!' mesajı verir.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Lili’nin harika bir fikri var! Birlikte yeni bir oyun buluyorlar.",
+      "duration": 8,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nLili’nin harika bir fikri var! Birlikte yeni bir oyun buluyorlar.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 4,
-      "narration": "Benekler ise uğur böceğinin yaşını göstermez ama onların kendilerini korumasına ve diğer böcekleri korkutmasına yardım eder.",
-      "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nBenekler ise uğur böceğinin yaşını göstermez ama onların kendilerini korumasına ve diğer böcekleri korkutmasına yardım eder.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Hop havada neşeyle dönüyor. Bakalım durabilecek mi?",
+      "duration": 8,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHop havada neşeyle dönüyor. Bakalım durabilecek mi?\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 5,
-      "narration": "Ayrıca uğur böcekleri bahçemizdeki zararlı böcekleri yiyerek bitkilerin sağlıklı kalmasını sağlar. Onlar doğanın gerçek kahramanlarıdır!",
+      "narration": "İşte oldu! Hop tam çiçeğin önünde durmayı başardı.",
       "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nAyrıca uğur böcekleri bahçemizdeki zararlı böcekleri yiyerek bitkilerin sağlıklı kalmasını sağlar. Onlar doğanın gerçek kahramanlarıdır!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nİşte oldu! Hop tam çiçeğin önünde durmayı başardı.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 6,
-      "narration": "Siz de bahçenizde bir uğur böceği görürseniz ona el sallamayı unutmayın! Bir sonraki maceramızda görüşmek üzere, hoşça kalın!",
-      "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nSiz de bahçenizde bir uğur böceği görürseniz ona el sallamayı unutmayın! Bir sonraki maceramızda görüşmek üzere, hoşça kalın!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Sevimli dostlar birlikte mis kokulu çiçeği kokluyorlar.",
+      "duration": 7,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nSevimli dostlar birlikte mis kokulu çiçeği kokluyorlar.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     }
   ]
 }

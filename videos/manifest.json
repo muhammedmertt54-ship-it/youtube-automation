@@ -1,15 +1,15 @@
 {
   "format": "short",
-  "title": "Gökyüzündeki Gizli Şekilleri Bulalım!",
-  "description": "Bugün gökyüzündeki pamuk bulutların içine gizlenmiş hayvanları ve şekilleri keşfediyoruz. Hayal gücümüzü kullanarak bulutların dünyasına harika bir yolculuğa çıkalım.",
-  "script": "Merhaba minik arkadaşım! Bugün başını gökyüzüne kaldırıp o bembeyaz pamuklara hiç baktın mı? Gökyüzünde süzülen bu dev pamuk şekerlerine bulut diyoruz ve hepsi birbirinden çok farklı görünüyor. Dikkatli bakarsan bulutların içinde gizli şekiller görebilirsin. Bak, şu büyük olan tıpkı zıplayan bir tavşana benzemiyor mu? Hemen yanındaki ise masmavi denizde yol alan kocaman bir yelkenli gemi gibi süzülüyor, ne kadar da eğlenceli! Aslında bulutlar minicik su damlalarından oluşur ve susayan çiçeklere yağmur getirerek onların büyümesine yardımcı olurlar. Bir dahaki sefere dışarı çıktığında gökyüzündeki şekilleri bulmaya çalış. Hayal kurmak en güzel oyun arkadaşıdır!",
+  "title": "Küçücük Bir Tohumun Büyük Yolculuğu 🌱",
+  "description": "Bugün hep birlikte bir tohumun nasıl filizlendiğini ve büyüdüğünü öğreniyoruz. Doğanın bu mucizevi döngüsünü keşfetmeye hazır mısınız?",
+  "script": "Merhaba arkadaşlar! Bugün avucumun içindeki bu küçücük tohumun nasıl kocaman bir bitkiye dönüştüğünü merak ediyor musunuz? İlk önce tohumumuzu yumuşacık toprağın altına güzelce yerleştiriyoruz. Orada mışıl mışıl uyumaya ve büyümeye hazırlanıyor. Tohumumuzun susamaması için ona can suyu veriyoruz. Su içtikçe tohumun içindeki hayat canlanmaya ve kabuğunu kırmaya başlıyor. Parlayan güneş toprağı ısıtırken, minik tohumumuz başını topraktan dışarı uzatıyor. İşte ilk yeşil filizimiz dünyaya merhaba dedi! Bitkimiz her gün biraz daha büyüyor ve yapraklarını gökyüzüne doğru açıyor. Bak ne kadar güçlü ve sağlıklı görünüyor! Küçücük bir tohumdan harika bir bitki doğdu. Unutmayın, sabırla beklersek ve sevgiyle bakarsak her şey güzelleşir. Bir sonraki videoda görüşürüz!",
   "scenes": [
     {
       "scene_number": 1,
-      "narration": "Merhaba minik arkadaşım! Bugün başını gökyüzüne kaldırıp o bembeyaz pamuklara hiç baktın mı?",
-      "search": "sky",
+      "narration": "Merhaba arkadaşlar! Bugün avucumun içindeki bu küçücük tohumun nasıl kocaman bir bitkiye dönüştüğünü merak ediyor musunuz?",
+      "search": "seed",
       "duration": 8,
-      "video_url": "https://videos.pexels.com/video-files/30098016/12908063_1080_1920_30fps.mp4"
+      "video_url": "https://videos.pexels.com/video-files/36508431/15480580_1280_720_25fps.mp4"
     }
   ]
 }

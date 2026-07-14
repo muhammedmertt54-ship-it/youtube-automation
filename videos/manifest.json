@@ -1,15 +1,15 @@
 {
   "format": "short",
-  "title": "Küçücük Bir Tohumun Büyük Yolculuğu 🌱",
-  "description": "Bugün hep birlikte bir tohumun nasıl filizlendiğini ve büyüdüğünü öğreniyoruz. Doğanın bu mucizevi döngüsünü keşfetmeye hazır mısınız?",
-  "script": "Merhaba arkadaşlar! Bugün avucumun içindeki bu küçücük tohumun nasıl kocaman bir bitkiye dönüştüğünü merak ediyor musunuz? İlk önce tohumumuzu yumuşacık toprağın altına güzelce yerleştiriyoruz. Orada mışıl mışıl uyumaya ve büyümeye hazırlanıyor. Tohumumuzun susamaması için ona can suyu veriyoruz. Su içtikçe tohumun içindeki hayat canlanmaya ve kabuğunu kırmaya başlıyor. Parlayan güneş toprağı ısıtırken, minik tohumumuz başını topraktan dışarı uzatıyor. İşte ilk yeşil filizimiz dünyaya merhaba dedi! Bitkimiz her gün biraz daha büyüyor ve yapraklarını gökyüzüne doğru açıyor. Bak ne kadar güçlü ve sağlıklı görünüyor! Küçücük bir tohumdan harika bir bitki doğdu. Unutmayın, sabırla beklersek ve sevgiyle bakarsak her şey güzelleşir. Bir sonraki videoda görüşürüz!",
+  "title": "Gökkuşağı Nasıl Oluşur? | Eğitici Çocuk Videoları",
+  "description": "Merhaba çocuklar! Bu videoda yağmurdan sonra gökyüzünde beliren renkli gökkuşağının sırrını öğreniyoruz. Doğanın bu mucizesini keşfetmeye hazır mısınız?",
+  "script": "Merhaba minik kaşif! Bugün seninle gökyüzünün en renkli sırrını keşfedeceğiz. Dışarıda şıkır şıkır yağmur yağarken hiç camdan dışarıya baktın mı? Yağmur damlaları toprağa ulaştığında çiçekler neşeyle uyanır ve susamış ağaçlar bu taze suyu afiyetle içer. Her yer mis gibi taze toprak kokar. Aniden bulutların arasından parlak güneş ben geldim der ve ışıklarını yağmur damlalarına doğru gönderir. Bu, doğanın en güzel oyunudur. Işıklar su damlalarının içinden geçerken sihirli bir şekilde yedi farklı renge bölünür. Gökyüzünde dev bir renk köprüsü kurulur! Bak işte orada! Kırmızı, turuncu, sarı, yeşil, mavi ve mor renkler el ele tutuşmuş bizi selamlıyor. Bu renkli mucizenin adı gökkuşağıdır. Doğa her gün bize böyle güzel hediyeler sunar. Unutma, en büyük yağmurlardan sonra bile mutlaka güzel bir gökkuşağı doğar. Kendine çok iyi bak!",
   "scenes": [
     {
       "scene_number": 1,
-      "narration": "Merhaba arkadaşlar! Bugün avucumun içindeki bu küçücük tohumun nasıl kocaman bir bitkiye dönüştüğünü merak ediyor musunuz?",
-      "search": "seed",
-      "duration": 8,
-      "video_url": "https://videos.pexels.com/video-files/36508431/15480580_1280_720_25fps.mp4"
+      "narration": "Merhaba minik kaşif! Bugün seninle gökyüzünün en renkli sırrını keşfedeceğiz. Dışarıda şıkır şıkır yağmur yağarken hiç camdan dışarıya baktın mı?",
+      "search": "rain",
+      "duration": 9,
+      "video_url": "https://videos.pexels.com/video-files/8499658/8499658-uhd_1440_2560_24fps.mp4"
     }
   ]
 }

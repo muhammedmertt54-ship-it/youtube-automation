@@ -1,0 +1,15 @@
+{
+  "format": "short",
+  "title": "Gökyüzündeki Gizli Şekilleri Bulalım!",
+  "description": "Bugün gökyüzündeki pamuk bulutların içine gizlenmiş hayvanları ve şekilleri keşfediyoruz. Hayal gücümüzü kullanarak bulutların dünyasına harika bir yolculuğa çıkalım.",
+  "script": "Merhaba minik arkadaşım! Bugün başını gökyüzüne kaldırıp o bembeyaz pamuklara hiç baktın mı? Gökyüzünde süzülen bu dev pamuk şekerlerine bulut diyoruz ve hepsi birbirinden çok farklı görünüyor. Dikkatli bakarsan bulutların içinde gizli şekiller görebilirsin. Bak, şu büyük olan tıpkı zıplayan bir tavşana benzemiyor mu? Hemen yanındaki ise masmavi denizde yol alan kocaman bir yelkenli gemi gibi süzülüyor, ne kadar da eğlenceli! Aslında bulutlar minicik su damlalarından oluşur ve susayan çiçeklere yağmur getirerek onların büyümesine yardımcı olurlar. Bir dahaki sefere dışarı çıktığında gökyüzündeki şekilleri bulmaya çalış. Hayal kurmak en güzel oyun arkadaşıdır!",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "narration": "Merhaba minik arkadaşım! Bugün başını gökyüzüne kaldırıp o bembeyaz pamuklara hiç baktın mı?",
+      "search": "sky",
+      "duration": 8,
+      "video_url": "https://videos.pexels.com/video-files/30098016/12908063_1080_1920_30fps.mp4"
+    }
+  ]
+}

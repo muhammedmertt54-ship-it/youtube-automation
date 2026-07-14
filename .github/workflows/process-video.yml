@@ -136,18 +136,27 @@ jobs:
             --file videos/script.txt \
             --write-media voice.mp3
 
-      - name: Görüntü ile Türkçe sesi birleştir
-        run: |
-          ffmpeg -y \
-            -i visuals.mp4 \
-            -i voice.mp3 \
-            -map 0:v:0 \
-            -map 1:a:0 \
-            -c:v copy \
-            -c:a aac \
-            -b:a 192k \
-            -shortest \
-            final-video.mp4
+     - name: Görüntü ile Türkçe sesi birleştir
+  run: |
+    AUDIO_DURATION=$(ffprobe -v error \
+      -show_entries format=duration \
+      -of default=noprint_wrappers=1:nokey=1 \
+      voice.mp3)
+
+    ffmpeg -y \
+      -stream_loop -1 \
+      -i visuals.mp4 \
+      -i voice.mp3 \
+      -map 0:v:0 \
+      -map 1:a:0 \
+      -c:v libx264 \
+      -preset fast \
+      -crf 23 \
+      -c:a aac \
+      -b:a 192k \
+      -t "$AUDIO_DURATION" \
+      -pix_fmt yuv420p \
+      final-video.mp4
 
       - name: Son videoyu kaydet
         uses: actions/upload-artifact@v4

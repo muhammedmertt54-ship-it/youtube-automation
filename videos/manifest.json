@@ -1,15 +1,51 @@
 {
   "format": "short",
-  "title": "Gökkuşağı Nasıl Oluşur? | Eğitici Çocuk Videoları",
-  "description": "Merhaba çocuklar! Bu videoda yağmurdan sonra gökyüzünde beliren renkli gökkuşağının sırrını öğreniyoruz. Doğanın bu mucizesini keşfetmeye hazır mısınız?",
-  "script": "Merhaba minik kaşif! Bugün seninle gökyüzünün en renkli sırrını keşfedeceğiz. Dışarıda şıkır şıkır yağmur yağarken hiç camdan dışarıya baktın mı? Yağmur damlaları toprağa ulaştığında çiçekler neşeyle uyanır ve susamış ağaçlar bu taze suyu afiyetle içer. Her yer mis gibi taze toprak kokar. Aniden bulutların arasından parlak güneş ben geldim der ve ışıklarını yağmur damlalarına doğru gönderir. Bu, doğanın en güzel oyunudur. Işıklar su damlalarının içinden geçerken sihirli bir şekilde yedi farklı renge bölünür. Gökyüzünde dev bir renk köprüsü kurulur! Bak işte orada! Kırmızı, turuncu, sarı, yeşil, mavi ve mor renkler el ele tutuşmuş bizi selamlıyor. Bu renkli mucizenin adı gökkuşağıdır. Doğa her gün bize böyle güzel hediyeler sunar. Unutma, en büyük yağmurlardan sonra bile mutlaka güzel bir gökkuşağı doğar. Kendine çok iyi bak!",
+  "title": "Bulutlar Nasıl Oluşur? ☁️",
+  "description": "Merhaba arkadaşlar! Bugün gökyüzündeki pamuk şeker gibi görünen bulutların nasıl oluştuğunu ve yağmurun nasıl yağdığını harika bir macerayla öğreneceğiz. Hadi keşfe çıkalım!",
+  "script": "Hey, gökyüzüne bak! O beyaz ve yumuşacık bulutların nasıl oraya geldiğini hiç merak ettin mi? Güneş, denizleri ve gölleri ısıtınca su, minicik buhar tanecikleri olup gökyüzüne doğru yolculuğa çıkar. Yukarıda hava soğuktur! Bu minik su buharları birbirine sıkıca sarılır ve kocaman beyaz bulutları oluşturur. Bulutlar çok fazla suyla dolduğunda ağırlaşırlar ve bazen renkleri birazcık griye döner. İşte o an! Bulutlar suları taşıyamaz ve yağmur damlaları olarak tıkır tıkır yere düşerler. Su döngüsü işte böyle çalışır! Bir sonraki maceramızda görüşmek üzere, merakla kalmayı unutma!",
+  "total_duration": 48,
   "scenes": [
     {
       "scene_number": 1,
-      "narration": "Merhaba minik kaşif! Bugün seninle gökyüzünün en renkli sırrını keşfedeceğiz. Dışarıda şıkır şıkır yağmur yağarken hiç camdan dışarıya baktın mı?",
-      "search": "rain",
-      "duration": 9,
-      "video_url": "https://videos.pexels.com/video-files/8499658/8499658-uhd_1440_2560_24fps.mp4"
+      "narration": "Hey, gökyüzüne bak! O beyaz ve yumuşacık bulutların nasıl oraya geldiğini hiç merak ettin mi?",
+      "search": "white fluffy clouds",
+      "duration": 8,
+      "video_url": "https://videos.pexels.com/video-files/34426550/14584145_960_540_30fps.mp4"
+    },
+    {
+      "scene_number": 2,
+      "narration": "Güneş, denizleri ve gölleri ısıtınca su, minicik buhar tanecikleri olup gökyüzüne doğru yolculuğa çıkar.",
+      "search": "sun reflection ocean",
+      "duration": 8,
+      "video_url": "https://videos.pexels.com/video-files/37217428/15766520_1080_1920_60fps.mp4"
+    },
+    {
+      "scene_number": 3,
+      "narration": "Yukarıda hava soğuktur! Bu minik su buharları birbirine sıkıca sarılır ve kocaman beyaz bulutları oluşturur.",
+      "search": "fast moving clouds",
+      "duration": 8,
+      "video_url": "https://videos.pexels.com/video-files/10616832/10616832-sd_960_540_30fps.mp4"
+    },
+    {
+      "scene_number": 4,
+      "narration": "Bulutlar çok fazla suyla dolduğunda ağırlaşırlar ve bazen renkleri birazcık griye döner.",
+      "search": "dark rain clouds",
+      "duration": 8,
+      "video_url": "https://videos.pexels.com/video-files/36306743/15397092_960_540_60fps.mp4"
+    },
+    {
+      "scene_number": 5,
+      "narration": "İşte o an! Bulutlar suları taşıyamaz ve yağmur damlaları olarak tıkır tıkır yere düşerler.",
+      "search": "rain falling puddles",
+      "duration": 8,
+      "video_url": "https://videos.pexels.com/video-files/3864100/3864100-sd_960_540_25fps.mp4"
+    },
+    {
+      "scene_number": 6,
+      "narration": "Su döngüsü işte böyle çalışır! Bir sonraki maceramızda görüşmek üzere, merakla kalmayı unutma!",
+      "search": "child laughing nature",
+      "duration": 8,
+      "video_url": "https://videos.pexels.com/video-files/7106876/7106876-sd_960_540_30fps.mp4"
     }
   ]
 }

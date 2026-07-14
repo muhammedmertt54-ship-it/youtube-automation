@@ -1,45 +1,45 @@
 {
   "format": "short",
-  "title": "Ateş Böcekleri Neden Işık Saçar?",
-  "description": "Sevimli ateş böceklerinin karanlık gecelerde nasıl ve neden parıldadığını eğlenceli ve eğitici bir dille öğreniyoruz.",
-  "script": "Hey, geceleri parıldayan minik fenerleri gördün mü? Evet, onlar sevimli ateş böcekleri! Peki bu küçük dostlarımız karanlıkta pırıl pırıl parlamayı nasıl başarıyorlar? Gelin birlikte öğrenelim! Ateş böceklerinin karınlarında özel bir ışık fabrikası vardır ve hiç sıcak olmayan, güvenli bir ışık üretirler. Bu tatlı ışıkları kullanarak birbirlerine gizli mesajlar gönderir ve \"Hey, ben buradayım!\" diye seslenirler. Her ateş böceği türü, tıpkı yanıp sönen renkli lambalar gibi farklı şekillerde göz kırpar. Doğanın bu ışıl ışıl mucizeleri gecemizi güzelleştiriyor. Bir sonraki maceramızda görüşmek üzere, merakla kalın!",
-  "total_duration": 42,
+  "title": "Uğur Böceklerinin Sırrı Nedir? 🐞",
+  "description": "Uğur böceklerinin üzerindeki o sevimli siyah beneklerin sırrını biliyor musunuz? Gelin, bu renkli dünyayı ve sevimli dostlarımızın gizemini birlikte keşfedelim!",
+  "script": "Merhaba minik kaşifler! Bugün doğanın en sevimli canlılarından biri olan uğur böceğini yakından tanımaya ne dersiniz? Peki, bu minik dostlarımızın üzerindeki kırmızı renk ve siyah benekler sadece süs mü dersiniz? Aslında hayır! Bu parlak kırmızı renk, kuşlara ve diğer avcılara 'Hey, ben çok lezzetsizim, beni sakın yeme!' mesajı verir. Benekler ise uğur böceğinin yaşını göstermez ama onların kendilerini korumasına ve diğer böcekleri korkutmasına yardım eder. Ayrıca uğur böcekleri bahçemizdeki zararlı böcekleri yiyerek bitkilerin sağlıklı kalmasını sağlar. Onlar doğanın gerçek kahramanlarıdır! Siz de bahçenizde bir uğur böceği görürseniz ona el sallamayı unutmayın! Bir sonraki maceramızda görüşmek üzere, hoşça kalın!",
+  "total_duration": 44,
   "scenes": [
     {
       "scene_number": 1,
-      "narration": "Hey, geceleri parıldayan minik fenerleri gördün mü? Evet, onlar sevimli ateş böcekleri!",
-      "duration": 6,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHey, geceleri parıldayan minik fenerleri gördün mü? Evet, onlar sevimli ateş böcekleri!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Merhaba minik kaşifler! Bugün doğanın en sevimli canlılarından biri olan uğur böceğini yakından tanımaya ne dersiniz?",
+      "duration": 7,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nMerhaba minik kaşifler! Bugün doğanın en sevimli canlılarından biri olan uğur böceğini yakından tanımaya ne dersiniz?\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 2,
-      "narration": "Peki bu küçük dostlarımız karanlıkta pırıl pırıl parlamayı nasıl başarıyorlar? Gelin birlikte öğrenelim!",
-      "duration": 6,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nPeki bu küçük dostlarımız karanlıkta pırıl pırıl parlamayı nasıl başarıyorlar? Gelin birlikte öğrenelim!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Peki, bu minik dostlarımızın üzerindeki kırmızı renk ve siyah benekler sadece süs mü dersiniz? Aslında hayır!",
+      "duration": 7,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nPeki, bu minik dostlarımızın üzerindeki kırmızı renk ve siyah benekler sadece süs mü dersiniz? Aslında hayır!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 3,
-      "narration": "Ateş böceklerinin karınlarında özel bir ışık fabrikası vardır ve hiç sıcak olmayan, güvenli bir ışık üretirler.",
-      "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nAteş böceklerinin karınlarında özel bir ışık fabrikası vardır ve hiç sıcak olmayan, güvenli bir ışık üretirler.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Bu parlak kırmızı renk, kuşlara ve diğer avcılara 'Hey, ben çok lezzetsizim, beni sakın yeme!' mesajı verir.",
+      "duration": 7,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nBu parlak kırmızı renk, kuşlara ve diğer avcılara 'Hey, ben çok lezzetsizim, beni sakın yeme!' mesajı verir.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 4,
-      "narration": "Bu tatlı ışıkları kullanarak birbirlerine gizli mesajlar gönderir ve \"Hey, ben buradayım!\" diye seslenirler.",
+      "narration": "Benekler ise uğur böceğinin yaşını göstermez ama onların kendilerini korumasına ve diğer böcekleri korkutmasına yardım eder.",
       "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nBu tatlı ışıkları kullanarak birbirlerine gizli mesajlar gönderir ve \"Hey, ben buradayım!\" diye seslenirler.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nBenekler ise uğur böceğinin yaşını göstermez ama onların kendilerini korumasına ve diğer böcekleri korkutmasına yardım eder.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 5,
-      "narration": "Her ateş böceği türü, tıpkı yanıp sönen renkli lambalar gibi farklı şekillerde göz kırpar.",
-      "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHer ateş böceği türü, tıpkı yanıp sönen renkli lambalar gibi farklı şekillerde göz kırpar.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "narration": "Ayrıca uğur böcekleri bahçemizdeki zararlı böcekleri yiyerek bitkilerin sağlıklı kalmasını sağlar. Onlar doğanın gerçek kahramanlarıdır!",
+      "duration": 8,
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nAyrıca uğur böcekleri bahçemizdeki zararlı böcekleri yiyerek bitkilerin sağlıklı kalmasını sağlar. Onlar doğanın gerçek kahramanlarıdır!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     },
     {
       "scene_number": 6,
-      "narration": "Doğanın bu ışıl ışıl mucizeleri gecemizi güzelleştiriyor. Bir sonraki maceramızda görüşmek üzere, merakla kalın!",
+      "narration": "Siz de bahçenizde bir uğur böceği görürseniz ona el sallamayı unutmayın! Bir sonraki maceramızda görüşmek üzere, hoşça kalın!",
       "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nDoğanın bu ışıl ışıl mucizeleri gecemizi güzelleştiriyor. Bir sonraki maceramızda görüşmek üzere, merakla kalın!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nSiz de bahçenizde bir uğur böceği görürseniz ona el sallamayı unutmayın! Bir sonraki maceramızda görüşmek üzere, hoşça kalın!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
     }
   ]
 }

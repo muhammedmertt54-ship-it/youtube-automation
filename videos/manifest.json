@@ -1,45 +1,92 @@
 {
   "format": "short",
-  "title": "Hop Zıplamayı Durduramıyor!",
-  "description": "Sevimli tavşan Hop o kadar çok zıplıyor ki bir türlü çiçeği koklamak için duramıyor. Lili ona çok eğlenceli bir durma dansı öğretiyor!",
-  "script": "Hop bugün o kadar heyecanlı ki, hiç durmadan zıplıyor! Hop! Neden durmuyorsun? Hop sevimli çiçeği koklamak istiyor ama pufff! Yine yukarı zıpladı! Duramıyorum Lili, bacaklarım tıp tıp zıplıyor! Lili’nin harika bir fikri var! Birlikte yeni bir oyun buluyorlar. Benimle tekrar et Hop: Zıpla, dön ve dur! Hop havada neşeyle dönüyor. Bakalım durabilecek mi? Zıpla, dön veeee... dur! İşte oldu! Hop tam çiçeğin önünde durmayı başardı. Başardın Hop! Harika durdun! Sevimli dostlar birlikte mis kokulu çiçeği kokluyorlar. Zıpla, dön ve dur! En güzel oyun bu!",
-  "total_duration": 46,
+  "title": "Birinin Senden Hoşlandığını Gösteren Sessiz İşaretler",
+  "description": "Beden dili ve günlük psikolojiyle birinin senden hoşlandığını anlamanın en kolay yolları. Shorts ve TikTok için özel psikoloji analizi.",
+  "topic": "Birinin senden hoşlandığını gösteren davranışlar",
+  "script": "Birinin senden hoşlandığını anlamak aslında sandığından çok daha kolay olabilir. Konuşurken göz bebeklerinin büyümesi, sana olan ilgisinin ilk sessiz işaretidir. Bedeninin ve ayak uçlarının sana doğru dönük olması, bilinçsiz bir çekim gösterir. Sıradan bir sohbette bile şakalarına herkesten önce gülüyorsa, bu özel bir bağdır. Sen konuşurken dikkatle dinleyip, küçük detayları günler sonra bile hatırlayabilir. Ortak ortamlarda sık sık göz göze geliyorsanız, bu rastlantı olmayabilir. Çevrendeki insanları iyi gözlemle, belki de o kişi çok yakındadır.",
+  "total_duration": 38,
+  "design": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "background": "navy_gradient",
+    "stripe_style": "red_white_waves",
+    "character_color": "white",
+    "accent_color": "red",
+    "text_color": "white",
+    "particles": true,
+    "vignette": true
+  },
   "scenes": [
     {
       "scene_number": 1,
-      "narration": "Hop bugün o kadar heyecanlı ki, hiç durmadan zıplıyor!",
-      "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHop bugün o kadar heyecanlı ki, hiç durmadan zıplıyor!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "text": "Birinin senden hoşlandığını anlamak aslında sandığından çok daha kolay olabilir.",
+      "highlight": "hoşlandığını",
+      "icon_key": "eye",
+      "visual_key": "eye_looking",
+      "visual_group": "symbol",
+      "animation": "pop",
+      "duration": 5
     },
     {
       "scene_number": 2,
-      "narration": "Hop sevimli çiçeği koklamak istiyor ama pufff! Yine yukarı zıpladı!",
-      "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHop sevimli çiçeği koklamak istiyor ama pufff! Yine yukarı zıpladı!\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "text": "Konuşurken göz bebeklerinin büyümesi, sana olan ilgisinin ilk sessiz işaretidir.",
+      "highlight": "büyümesi",
+      "icon_key": "two_people_close",
+      "visual_key": "two_people_close",
+      "visual_group": "relationship",
+      "animation": "slow_zoom",
+      "duration": 6
     },
     {
       "scene_number": 3,
-      "narration": "Lili’nin harika bir fikri var! Birlikte yeni bir oyun buluyorlar.",
-      "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nLili’nin harika bir fikri var! Birlikte yeni bir oyun buluyorlar.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "text": "Bedeninin ve ayak uçlarının sana doğru dönük olması, bilinçsiz bir çekim gösterir.",
+      "highlight": "çekim",
+      "icon_key": "person_sitting",
+      "visual_key": "mindy_sitting",
+      "visual_group": "person",
+      "animation": "slide_left",
+      "duration": 6
     },
     {
       "scene_number": 4,
-      "narration": "Hop havada neşeyle dönüyor. Bakalım durabilecek mi?",
-      "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nHop havada neşeyle dönüyor. Bakalım durabilecek mi?\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "text": "Sıradan bir sohbette bile şakalarına herkesten önce gülüyorsa, bu özel bir bağdır.",
+      "highlight": "gülüyorsa",
+      "icon_key": "person_happy",
+      "visual_key": "mindy_happy",
+      "visual_group": "person",
+      "animation": "bounce",
+      "duration": 6
     },
     {
       "scene_number": 5,
-      "narration": "İşte oldu! Hop tam çiçeğin önünde durmayı başardı.",
-      "duration": 8,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nİşte oldu! Hop tam çiçeğin önünde durmayı başardı.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "text": "Sen konuşurken dikkatle dinleyip, küçük detayları günler sonra bile hatırlayabilir.",
+      "highlight": "hatırlayabilir",
+      "icon_key": "person_listening",
+      "visual_key": "mindy_listening",
+      "visual_group": "person",
+      "animation": "fade_in",
+      "duration": 5
     },
     {
       "scene_number": 6,
-      "narration": "Sevimli dostlar birlikte mis kokulu çiçeği kokluyorlar.",
-      "duration": 7,
-      "image_prompt": "Cute colorful 3D cartoon illustration for children.\nSevimli dostlar birlikte mis kokulu çiçeği kokluyorlar.\n\nHigh quality colorful 3D family animation style.\nConsistent cute characters.\nSoft cinematic lighting.\nBright cheerful colors.\nChild friendly.\nNo text.\nNo logo.\nNo watermark.\nVertical 9:16 composition."
+      "text": "Ortak ortamlarda sık sık göz göze geliyorsanız, bu rastlantı olmayabilir.",
+      "highlight": "rastlantı",
+      "icon_key": "two_people_talking",
+      "visual_key": "two_people_talking",
+      "visual_group": "relationship",
+      "animation": "pulse",
+      "duration": 5
+    },
+    {
+      "scene_number": 7,
+      "text": "Çevrendeki insanları iyi gözlemle, belki de o kişi çok yakındadır.",
+      "highlight": "yakındadır",
+      "icon_key": "person_thinking",
+      "visual_key": "mindy_thinking",
+      "visual_group": "person",
+      "animation": "float",
+      "duration": 5
     }
   ]
 }

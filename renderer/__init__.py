@@ -1,1 +1,1 @@
-# Psychology Shorts video renderer
+"""Mindora psychology Shorts renderer package."""

@@ -2,121 +2,70 @@ from __future__ import annotations
 
 import math
 import random
-
 from PIL import Image, ImageDraw, ImageFilter
 
+NAVY_TOP=(3,8,42)
+NAVY_BOTTOM=(8,18,72)
+WHITE=(248,250,255)
+RED=(239,56,74)
+BLUE_GLOW=(42,80,190)
 
-NAVY_TOP = (5, 18, 55)
-NAVY_BOTTOM = (13, 39, 96)
-WHITE = (248, 250, 255)
-RED = (239, 56, 74)
-BLUE_GLOW = (55, 120, 255)
 
-
-def create_gradient(width: int, height: int) -> Image.Image:
-    image = Image.new("RGB", (width, height), NAVY_TOP)
-    draw = ImageDraw.Draw(image)
-
+def create_gradient(width,height):
+    img=Image.new("RGB",(width,height),NAVY_TOP)
+    d=ImageDraw.Draw(img)
     for y in range(height):
-        ratio = (y / max(1, height - 1)) ** 1.15
-        color = tuple(
-            int(NAVY_TOP[i] * (1.0 - ratio) + NAVY_BOTTOM[i] * ratio)
-            for i in range(3)
-        )
-        draw.line((0, y, width, y), fill=color)
-
-    return image.convert("RGBA")
+        r=(y/max(1,height-1))**1.2
+        c=tuple(int(NAVY_TOP[i]*(1-r)+NAVY_BOTTOM[i]*r) for i in range(3))
+        d.line((0,y,width,y),fill=c)
+    return img.convert("RGBA")
 
 
-def draw_particles(
-    draw: ImageDraw.ImageDraw,
-    frame_number: int,
-    scene_index: int,
-    width: int,
-    height: int,
-) -> None:
-    random.seed(scene_index * 1000)
-
-    for particle_index in range(24):
-        base_x = random.randint(0, width)
-        base_y = random.randint(0, height)
-        speed = random.uniform(0.15, 0.55)
-        radius = random.choice([1, 1, 2, 2, 3])
-
-        x = (
-            base_x
-            + math.sin(frame_number * 0.015 * speed + particle_index) * 18
-        ) % width
-        y = (base_y - frame_number * speed * 0.38) % height
-        alpha = random.randint(18, 55)
-
-        draw.ellipse(
-            (int(x - radius), int(y - radius), int(x + radius), int(y + radius)),
-            fill=(180, 210, 255, alpha),
-        )
+def draw_particles(draw,frame_number,scene_index,width,height):
+    random.seed(scene_index*777)
+    for i in range(16):
+        bx=random.randint(0,width); by=random.randint(0,height)
+        speed=random.uniform(.12,.40)
+        rad=random.choice([1,1,2])
+        x=(bx+math.sin(frame_number*.012*speed+i)*12)%width
+        y=(by-frame_number*speed*.25)%height
+        a=random.randint(12,34)
+        draw.ellipse((x-rad,y-rad,x+rad,y+rad),fill=(180,205,255,a))
 
 
-def draw_wave_lines(
-    draw: ImageDraw.ImageDraw,
-    frame_number: int,
-    width: int,
-    height: int,
-) -> None:
-    phase = frame_number * 0.035
-    configs = [
-        (86, 17, 118, (255, 255, 255, 205), 7, 0.0),
-        (116, 22, 135, (239, 56, 74, 225), 10, 1.3),
-        (height - 112, 22, 128, (239, 56, 74, 220), 10, 0.7),
-        (height - 80, 15, 110, (255, 255, 255, 195), 7, 2.1),
+def draw_wave_lines(draw,frame_number,width,height):
+    phase=frame_number*.028
+    configs=[
+        (82,13,130,(255,255,255,150),5,0.0),
+        (102,16,145,(239,56,74,170),7,1.2),
     ]
-
-    for base_y, amplitude, period, color, line_width, offset in configs:
-        points = []
-        for x in range(-20, width + 21, 8):
-            y = base_y + math.sin(x / period + phase + offset) * amplitude
-            points.append((x, int(y)))
-        draw.line(points, fill=color, width=line_width, joint="curve")
-
-
-def draw_glow_circle(
-    layer: Image.Image,
-    center_x: int,
-    center_y: int,
-    radius: int,
-    color: tuple[int, int, int] = BLUE_GLOW,
-    alpha: int = 70,
-) -> None:
-    glow = Image.new("RGBA", layer.size, (0, 0, 0, 0))
-    glow_draw = ImageDraw.Draw(glow)
-    glow_draw.ellipse(
-        (
-            center_x - radius,
-            center_y - radius,
-            center_x + radius,
-            center_y + radius,
-        ),
-        fill=(*color, alpha),
-    )
-    glow = glow.filter(ImageFilter.GaussianBlur(max(8, radius // 2)))
-    layer.alpha_composite(glow)
+    for base,amp,period,color,lw,off in configs:
+        pts=[]
+        for x in range(-20,width+21,8):
+            y=base+math.sin(x/period+phase+off)*amp
+            pts.append((x,int(y)))
+        draw.line(pts,fill=color,width=lw,joint="curve")
 
 
-def apply_vignette(image: Image.Image) -> None:
-    width, height = image.size
-    overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
-    pixels = overlay.load()
-    center_x = width / 2
-    center_y = height / 2
-    max_distance = math.sqrt(center_x**2 + center_y**2)
+def draw_glow_circle(layer,cx,cy,radius,color=BLUE_GLOW,alpha=50):
+    g=Image.new("RGBA",layer.size,(0,0,0,0))
+    gd=ImageDraw.Draw(g)
+    gd.ellipse((cx-radius,cy-radius,cx+radius,cy+radius),fill=(*color,alpha))
+    g=g.filter(ImageFilter.GaussianBlur(max(8,radius//2)))
+    layer.alpha_composite(g)
 
-    for y in range(0, height, 4):
-        for x in range(0, width, 4):
-            distance = math.sqrt((x - center_x) ** 2 + (y - center_y) ** 2)
-            ratio = max(0.0, min(1.0, distance / max_distance))
-            alpha = int(max(0, (ratio - 0.45) * 150))
 
-            for yy in range(y, min(y + 4, height)):
-                for xx in range(x, min(x + 4, width)):
-                    pixels[xx, yy] = (0, 0, 0, alpha)
-
-    image.alpha_composite(overlay)
+def apply_vignette(image):
+    w,h=image.size
+    ov=Image.new("RGBA",image.size,(0,0,0,0))
+    px=ov.load()
+    cx=w/2; cy=h/2; md=math.sqrt(cx**2+cy**2)
+    for y in range(0,h,4):
+        for x in range(0,w,4):
+            dist=math.sqrt((x-cx)**2+(y-cy)**2)
+            ratio=max(0,min(1,dist/md))
+            alpha=int(max(0,(ratio-.42)*170))
+            for yy in range(y,min(y+4,h)):
+                for xx in range(x,min(x+4,w)):
+                    px[xx,yy]=(0,0,0,alpha)
+    image.alpha_composite(ov)

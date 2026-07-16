@@ -1,4 +1,4 @@
-name: Process YouTube Video
+name: Process Psychology Shorts
 
 on:
   push:
@@ -9,9 +9,10 @@ on:
 jobs:
   create-video:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
-      - name: Dosyaları al
+      - name: Repository dosyalarını al
         uses: actions/checkout@v4
 
       - name: Gerekli araçları kur
@@ -21,394 +22,2320 @@ jobs:
           python -m pip install --upgrade pip
           pip install pillow edge-tts
 
-      - name: Manifest kontrolü
-        run: |
-          test -f videos/manifest.json || {
-            echo "videos/manifest.json bulunamadı"
-            exit 1
-          }
-
-      - name: Türkçe ses oluştur
+      - name: Manifest dosyasını doğrula
         run: |
           python <<'PY'
           import json
+          from pathlib import Path
 
-          with open("videos/manifest.json", "r", encoding="utf-8") as f:
-              data = json.load(f)
+          path = Path("videos/manifest.json")
 
-          script = data.get("script", "").strip()
+          if not path.exists():
+              raise RuntimeError("videos/manifest.json bulunamadı.")
+
+          with path.open("r", encoding="utf-8") as file:
+              data = json.load(file)
+
+          required = ["title", "description", "script", "scenes"]
+
+          for key in required:
+              if key not in data:
+                  raise RuntimeError(f"Manifest içinde {key} alanı eksik.")
+
+          scenes = data.get("scenes", [])
+
+          if not isinstance(scenes, list) or len(scenes) != 7:
+              raise RuntimeError(
+                  f"Tam olarak 7 sahne gerekli. Gelen sahne sayısı: {len(scenes)}"
+              )
+
+          allowed_visuals = {
+              "mindy_thinking",
+              "mindy_sad",
+              "mindy_happy",
+              "mindy_walking",
+              "mindy_sitting",
+              "mindy_confident",
+              "mindy_listening",
+              "mindy_talking",
+              "mindy_looking_away",
+              "two_people_close",
+              "two_people_apart",
+              "two_people_talking",
+              "heart_broken",
+              "heart_full",
+              "brain_thinking",
+              "eye_looking",
+              "ear_listening",
+              "phone",
+              "message_bubble",
+              "clock",
+              "lock",
+              "key",
+              "warning",
+              "question",
+              "footsteps",
+              "handshake",
+          }
+
+          allowed_animations = {
+              "fade_in",
+              "pop",
+              "slide_left",
+              "slide_right",
+              "slow_zoom",
+              "pulse",
+              "shake",
+              "float",
+              "bounce",
+          }
+
+          for index, scene in enumerate(scenes, start=1):
+              for key in [
+                  "scene_number",
+                  "text",
+                  "highlight",
+                  "visual_key",
+                  "animation",
+                  "duration",
+              ]:
+                  if key not in scene:
+                      raise RuntimeError(
+                          f"{index}. sahnede {key} alanı eksik."
+                      )
+
+              if scene["visual_key"] not in allowed_visuals:
+                  raise RuntimeError(
+                      f"{index}. sahnede desteklenmeyen visual_key: "
+                      f"{scene['visual_key']}"
+                  )
+
+              if scene["animation"] not in allowed_animations:
+                  raise RuntimeError(
+                      f"{index}. sahnede desteklenmeyen animation: "
+                      f"{scene['animation']}"
+                  )
+
+              duration = float(scene["duration"])
+
+              if duration < 3 or duration > 10:
+                  raise RuntimeError(
+                      f"{index}. sahne süresi 3-10 saniye arasında olmalı."
+                  )
+
+          print("Manifest doğrulandı.")
+          print("Başlık:", data["title"])
+          print("Sahne sayısı:", len(scenes))
+          PY
+
+      - name: Türkçe seslendirme oluştur
+        run: |
+          python <<'PY'
+          import json
+          from pathlib import Path
+
+          with open("videos/manifest.json", "r", encoding="utf-8") as file:
+              data = json.load(file)
+
+          script = str(data.get("script", "")).strip()
 
           if not script:
-              raise RuntimeError("Seslendirme metni bulunamadı.")
+              raise RuntimeError("Seslendirme metni boş.")
 
-          with open("videos/script.txt", "w", encoding="utf-8") as f:
-              f.write(script)
+          Path("videos/script.txt").write_text(
+              script,
+              encoding="utf-8"
+          )
           PY
 
           edge-tts \
             --voice tr-TR-EmelNeural \
-            --rate=+0% \
+            --rate=+4% \
+            --pitch=-2Hz \
             --file videos/script.txt \
             --write-media voice.mp3
 
-      - name: Çocuk animasyonu sahnelerini hazırla
+      - name: Orijinal arka plan müziği oluştur
+        run: |
+          AUDIO_DURATION=$(ffprobe -v error \
+            -show_entries format=duration \
+            -of default=noprint_wrappers=1:nokey=1 \
+            voice.mp3)
+
+          ffmpeg -y \
+            -f lavfi -i "sine=frequency=196:sample_rate=44100:duration=${AUDIO_DURATION}" \
+            -f lavfi -i "sine=frequency=247:sample_rate=44100:duration=${AUDIO_DURATION}" \
+            -f lavfi -i "sine=frequency=294:sample_rate=44100:duration=${AUDIO_DURATION}" \
+            -filter_complex "\
+              [0:a]volume=0.018[a0];\
+              [1:a]volume=0.012[a1];\
+              [2:a]volume=0.008[a2];\
+              [a0][a1][a2]amix=inputs=3:normalize=0,\
+              lowpass=f=1200,\
+              highpass=f=90,\
+              afade=t=in:st=0:d=1.2,\
+              afade=t=out:st=$(python - <<PY
+          d=float('${AUDIO_DURATION}')
+          print(max(0,d-1.5))
+          PY
+          ):d=1.5\
+              [music]" \
+            -map "[music]" \
+            -c:a aac \
+            -b:a 128k \
+            music.m4a
+
+      - name: Profesyonel sahne videosunu render et
         run: |
           python <<'PY'
           import json
           import math
+          import random
           import subprocess
           from pathlib import Path
-          from PIL import Image, ImageDraw, ImageFont
+          from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-          with open("videos/manifest.json", "r", encoding="utf-8") as f:
-              data = json.load(f)
+          MANIFEST_PATH = "videos/manifest.json"
+          FPS = 30
 
-          scenes = data.get("scenes", [])
-          video_format = data.get("format", "short")
+          # Daha hızlı render için 720x1280 oluşturulur.
+          # Son aşamada 1080x1920'ye yükseltilir.
+          WIDTH = 720
+          HEIGHT = 1280
 
-          if not scenes:
-              raise RuntimeError("Sahne bulunamadı.")
+          NAVY_TOP = (5, 18, 55)
+          NAVY_BOTTOM = (13, 39, 96)
+          WHITE = (248, 250, 255)
+          SOFT_WHITE = (220, 230, 248)
+          RED = (239, 56, 74)
+          RED_DARK = (170, 24, 48)
+          BLUE_GLOW = (55, 120, 255)
+          SHADOW = (0, 0, 0, 95)
 
-          if video_format == "short":
-              width, height = 1080, 1920
-          else:
-              width, height = 1920, 1080
+          FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+          FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
-          font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-          normal_font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+          with open(MANIFEST_PATH, "r", encoding="utf-8") as file:
+              manifest = json.load(file)
 
-          title_font = ImageFont.truetype(font_path, max(42, width // 24))
-          text_font = ImageFont.truetype(normal_font_path, max(32, width // 34))
+          scenes = manifest["scenes"]
 
-          def wrap_text(draw, text, font, max_width):
-              words = text.split()
-              lines = []
-              current = ""
-
-              for word in words:
-                  test = f"{current} {word}".strip()
-                  box = draw.textbbox((0, 0), test, font=font)
-
-                  if box[2] - box[0] <= max_width:
-                      current = test
-                  else:
-                      if current:
-                          lines.append(current)
-                      current = word
-
-              if current:
-                  lines.append(current)
-
-              return lines
-
-          def draw_cloud(draw, x, y, scale=1):
-              white = (255, 255, 255)
-              draw.ellipse((x, y, x + 180*scale, y + 120*scale), fill=white)
-              draw.ellipse((x + 90*scale, y - 55*scale, x + 280*scale, y + 120*scale), fill=white)
-              draw.ellipse((x + 210*scale, y, x + 390*scale, y + 120*scale), fill=white)
-              draw.rounded_rectangle(
-                  (x + 45*scale, y + 55*scale, x + 350*scale, y + 145*scale),
-                  radius=int(40*scale),
-                  fill=white
-              )
-
-          def draw_sun(draw, x, y, radius):
-              for angle in range(0, 360, 30):
-                  a = math.radians(angle)
-                  x1 = x + math.cos(a) * (radius + 20)
-                  y1 = y + math.sin(a) * (radius + 20)
-                  x2 = x + math.cos(a) * (radius + 70)
-                  y2 = y + math.sin(a) * (radius + 70)
-                  draw.line((x1, y1, x2, y2), fill=(255, 205, 45), width=18)
-
-              draw.ellipse(
-                  (x-radius, y-radius, x+radius, y+radius),
-                  fill=(255, 220, 55)
-              )
-
-              draw.ellipse((x-35, y-20, x-15, y), fill=(70, 70, 70))
-              draw.ellipse((x+15, y-20, x+35, y), fill=(70, 70, 70))
-              draw.arc(
-                  (x-40, y-5, x+40, y+50),
-                  start=10,
-                  end=170,
-                  fill=(70, 70, 70),
-                  width=7
-              )
-
-          def draw_rain(draw, width, height):
-              for i in range(12):
-                  x = int(width * (0.08 + i * 0.075))
-                  y = int(height * (0.40 + (i % 3) * 0.06))
-                  draw.line(
-                      (x, y, x - 20, y + 70),
-                      fill=(80, 165, 255),
-                      width=max(8, width // 120)
-                  )
-
-          def draw_flowers(draw, width, height):
-              ground_y = int(height * 0.78)
-
-              draw.rectangle(
-                  (0, ground_y, width, height),
-                  fill=(100, 205, 105)
-              )
-
-              for i in range(8):
-                  x = int(width * (0.08 + i * 0.12))
-                  stem_top = ground_y - 130 - (i % 2) * 50
-
-                  draw.line(
-                      (x, ground_y, x, stem_top),
-                      fill=(40, 145, 65),
-                      width=max(8, width // 120)
-                  )
-
-                  color = [
-                      (255, 100, 120),
-                      (255, 210, 60),
-                      (160, 100, 255),
-                      (255, 145, 60)
-                  ][i % 4]
-
-                  for angle in range(0, 360, 72):
-                      a = math.radians(angle)
-                      px = x + math.cos(a) * 35
-                      py = stem_top + math.sin(a) * 35
-                      draw.ellipse(
-                          (px-25, py-25, px+25, py+25),
-                          fill=color
-                      )
-
-                  draw.ellipse(
-                      (x-22, stem_top-22, x+22, stem_top+22),
-                      fill=(255, 220, 60)
-                  )
-
-          Path("scenes").mkdir(exist_ok=True)
-
-          for index, scene in enumerate(scenes, start=1):
-              narration = str(scene.get("narration", ""))
-              prompt = str(scene.get("image_prompt", ""))
-              combined = f"{narration} {prompt}".lower()
-
-              image = Image.new("RGB", (width, height), (105, 190, 255))
-              draw = ImageDraw.Draw(image)
-
-              for y in range(height):
-                  ratio = y / height
-                  color = (
-                      int(85 + 90 * ratio),
-                      int(175 + 55 * ratio),
-                      int(250 - 20 * ratio)
-                  )
-                  draw.line((0, y, width, y), fill=color)
-
-              draw_sun(
-                  draw,
-                  int(width * 0.82),
-                  int(height * 0.15),
-                  int(width * 0.075)
-              )
-
-              draw_cloud(
-                  draw,
-                  int(width * 0.08),
-                  int(height * 0.20),
-                  max(0.8, width / 1900)
-              )
-
-              draw_cloud(
-                  draw,
-                  int(width * 0.50),
-                  int(height * 0.30),
-                  max(0.65, width / 2300)
-              )
-
-              if "yağmur" in combined or "rain" in combined:
-                  draw_rain(draw, width, height)
-
-              if (
-                  "çiçek" in combined or
-                  "bitki" in combined or
-                  "flower" in combined or
-                  "plant" in combined
-              ):
-                  draw_flowers(draw, width, height)
-
-              panel_margin = int(width * 0.06)
-              panel_top = int(height * 0.60)
-              panel_bottom = int(height * 0.91)
-
-              draw.rounded_rectangle(
-                  (
-                      panel_margin,
-                      panel_top,
-                      width - panel_margin,
-                      panel_bottom
-                  ),
-                  radius=max(35, width // 28),
-                  fill=(255, 255, 255, 235),
-                  outline=(255, 220, 80),
-                  width=max(8, width // 120)
-              )
-
-              scene_title = f"Sahne {index}"
-              draw.text(
-                  (panel_margin + 45, panel_top + 35),
-                  scene_title,
-                  font=title_font,
-                  fill=(55, 80, 160)
-              )
-
-              lines = wrap_text(
-                  draw,
-                  narration,
-                  text_font,
-                  width - panel_margin * 2 - 90
-              )
-
-              text_y = panel_top + 125
-
-              for line in lines[:7]:
-                  draw.text(
-                      (panel_margin + 45, text_y),
-                      line,
-                      font=text_font,
-                      fill=(45, 45, 70)
-                  )
-                  text_y += text_font.size + 15
-
-              output = f"scenes/scene_{index:03d}.png"
-              image.save(output, quality=95)
-
-          with open("scene_data.json", "w", encoding="utf-8") as f:
-              json.dump(
-                  {
-                      "format": video_format,
-                      "width": width,
-                      "height": height,
-                      "scenes": scenes
-                  },
-                  f,
-                  ensure_ascii=False,
-                  indent=2
-              )
-          PY
-
-      - name: Sahne videolarını oluştur
-        run: |
-          python <<'PY'
-          import json
-          import subprocess
-
-          with open("scene_data.json", "r", encoding="utf-8") as f:
-              data = json.load(f)
-
-          width = data["width"]
-          height = data["height"]
-          scenes = data["scenes"]
-
+          # Ses süresini al.
           probe = subprocess.run(
               [
                   "ffprobe",
                   "-v", "error",
                   "-show_entries", "format=duration",
                   "-of", "default=noprint_wrappers=1:nokey=1",
-                  "voice.mp3"
+                  "voice.mp3",
               ],
               capture_output=True,
               text=True,
-              check=True
+              check=True,
           )
 
           audio_duration = float(probe.stdout.strip())
-          original_total = sum(
-              float(scene.get("duration", 8))
+
+          manifest_duration = sum(
+              float(scene.get("duration", 5))
               for scene in scenes
           )
 
-          if original_total <= 0:
-              original_total = len(scenes) * 8
+          if manifest_duration <= 0:
+              manifest_duration = 35.0
 
-          scale_factor = audio_duration / original_total
-          output_files = []
+          scale_factor = audio_duration / manifest_duration
 
-          for index, scene in enumerate(scenes, start=1):
-              original_duration = float(scene.get("duration", 8))
-              duration = max(1.0, original_duration * scale_factor)
+          scene_durations = [
+              max(2.8, float(scene.get("duration", 5)) * scale_factor)
+              for scene in scenes
+          ]
 
-              image_path = f"scenes/scene_{index:03d}.png"
-              output_path = f"scene_{index:03d}.mp4"
+          # Son sahnenin süresini sesle tam eşleştir.
+          difference = audio_duration - sum(scene_durations)
+          scene_durations[-1] = max(
+              2.8,
+              scene_durations[-1] + difference
+          )
 
-              frames = max(1, round(duration * 30))
+          # Fontlar
+          title_font = ImageFont.truetype(FONT_BOLD, 30)
+          body_font = ImageFont.truetype(FONT_BOLD, 46)
+          body_font_small = ImageFont.truetype(FONT_BOLD, 39)
+          brand_font = ImageFont.truetype(FONT_BOLD, 25)
+          tiny_font = ImageFont.truetype(FONT_REGULAR, 19)
 
-              video_filter = (
-                  f"scale={width}:{height},"
-                  f"zoompan="
-                  f"z='min(zoom+0.0008,1.08)':"
-                  f"x='iw/2-(iw/zoom/2)':"
-                  f"y='ih/2-(ih/zoom/2)':"
-                  f"d={frames}:"
-                  f"s={width}x{height}:"
-                  f"fps=30,"
-                  f"format=yuv420p"
+          def clamp(value, low=0.0, high=1.0):
+              return max(low, min(high, value))
+
+          def ease_out_back(t):
+              t = clamp(t)
+              c1 = 1.70158
+              c3 = c1 + 1
+              return 1 + c3 * (t - 1) ** 3 + c1 * (t - 1) ** 2
+
+          def ease_in_out(t):
+              t = clamp(t)
+              return 0.5 - 0.5 * math.cos(math.pi * t)
+
+          def create_gradient():
+              image = Image.new("RGB", (WIDTH, HEIGHT), NAVY_TOP)
+              draw = ImageDraw.Draw(image)
+
+              for y in range(HEIGHT):
+                  ratio = y / max(1, HEIGHT - 1)
+                  ratio = ratio ** 1.15
+
+                  color = tuple(
+                      int(
+                          NAVY_TOP[channel] * (1 - ratio)
+                          + NAVY_BOTTOM[channel] * ratio
+                      )
+                      for channel in range(3)
+                  )
+
+                  draw.line((0, y, WIDTH, y), fill=color)
+
+              return image.convert("RGBA")
+
+          def draw_vignette(image):
+              overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
+              pixels = overlay.load()
+
+              center_x = WIDTH / 2
+              center_y = HEIGHT / 2
+              max_distance = math.sqrt(center_x ** 2 + center_y ** 2)
+
+              for y in range(0, HEIGHT, 4):
+                  for x in range(0, WIDTH, 4):
+                      distance = math.sqrt(
+                          (x - center_x) ** 2
+                          + (y - center_y) ** 2
+                      )
+
+                      ratio = clamp(distance / max_distance)
+                      alpha = int(max(0, (ratio - 0.45) * 150))
+
+                      for yy in range(y, min(y + 4, HEIGHT)):
+                          for xx in range(x, min(x + 4, WIDTH)):
+                              pixels[xx, yy] = (0, 0, 0, alpha)
+
+              image.alpha_composite(overlay)
+
+          def draw_particles(draw, frame_number, scene_index):
+              random.seed(scene_index * 1000)
+
+              for particle_index in range(24):
+                  base_x = random.randint(0, WIDTH)
+                  base_y = random.randint(0, HEIGHT)
+                  speed = random.uniform(0.15, 0.55)
+                  radius = random.choice([1, 1, 2, 2, 3])
+
+                  x = (
+                      base_x
+                      + math.sin(
+                          frame_number * 0.015 * speed
+                          + particle_index
+                      ) * 18
+                  ) % WIDTH
+
+                  y = (
+                      base_y
+                      - frame_number * speed * 0.38
+                  ) % HEIGHT
+
+                  alpha = random.randint(18, 55)
+
+                  draw.ellipse(
+                      (
+                          int(x - radius),
+                          int(y - radius),
+                          int(x + radius),
+                          int(y + radius),
+                      ),
+                      fill=(180, 210, 255, alpha),
+                  )
+
+          def draw_wave_lines(draw, frame_number):
+              phase = frame_number * 0.035
+
+              configs = [
+                  {
+                      "base_y": 86,
+                      "amplitude": 17,
+                      "period": 118,
+                      "color": (255, 255, 255, 205),
+                      "width": 7,
+                      "offset": 0.0,
+                  },
+                  {
+                      "base_y": 116,
+                      "amplitude": 22,
+                      "period": 135,
+                      "color": (239, 56, 74, 225),
+                      "width": 10,
+                      "offset": 1.3,
+                  },
+                  {
+                      "base_y": HEIGHT - 112,
+                      "amplitude": 22,
+                      "period": 128,
+                      "color": (239, 56, 74, 220),
+                      "width": 10,
+                      "offset": 0.7,
+                  },
+                  {
+                      "base_y": HEIGHT - 80,
+                      "amplitude": 15,
+                      "period": 110,
+                      "color": (255, 255, 255, 195),
+                      "width": 7,
+                      "offset": 2.1,
+                  },
+              ]
+
+              for config in configs:
+                  points = []
+
+                  for x in range(-20, WIDTH + 21, 8):
+                      y = (
+                          config["base_y"]
+                          + math.sin(
+                              x / config["period"]
+                              + phase
+                              + config["offset"]
+                          ) * config["amplitude"]
+                      )
+
+                      points.append((x, int(y)))
+
+                  draw.line(
+                      points,
+                      fill=config["color"],
+                      width=config["width"],
+                      joint="curve",
+                  )
+
+          def draw_brand(draw, scene_number):
+              brand = "MINDORA"
+
+              brand_box = draw.textbbox(
+                  (0, 0),
+                  brand,
+                  font=brand_font
               )
 
-              subprocess.run(
+              brand_width = brand_box[2] - brand_box[0]
+
+              x = WIDTH - brand_width - 34
+              y = 31
+
+              draw.rounded_rectangle(
+                  (
+                      x - 17,
+                      y - 8,
+                      x + brand_width + 17,
+                      y + 37,
+                  ),
+                  radius=18,
+                  fill=(255, 255, 255, 28),
+                  outline=(255, 255, 255, 50),
+                  width=1,
+              )
+
+              draw.text(
+                  (x, y),
+                  brand,
+                  font=brand_font,
+                  fill=WHITE,
+              )
+
+              draw.text(
+                  (34, 35),
+                  f"{scene_number}/7",
+                  font=tiny_font,
+                  fill=(210, 220, 245, 210),
+              )
+
+          def draw_progress(draw, progress):
+              bar_x = 48
+              bar_y = HEIGHT - 50
+              bar_width = WIDTH - 96
+              bar_height = 7
+
+              draw.rounded_rectangle(
+                  (
+                      bar_x,
+                      bar_y,
+                      bar_x + bar_width,
+                      bar_y + bar_height,
+                  ),
+                  radius=4,
+                  fill=(255, 255, 255, 45),
+              )
+
+              filled = int(bar_width * clamp(progress))
+
+              if filled > 0:
+                  draw.rounded_rectangle(
+                      (
+                          bar_x,
+                          bar_y,
+                          bar_x + filled,
+                          bar_y + bar_height,
+                      ),
+                      radius=4,
+                      fill=RED,
+                  )
+
+          def draw_glow_circle(
+              layer,
+              center_x,
+              center_y,
+              radius,
+              color,
+              alpha=90,
+          ):
+              glow = Image.new("RGBA", layer.size, (0, 0, 0, 0))
+              glow_draw = ImageDraw.Draw(glow)
+
+              glow_draw.ellipse(
+                  (
+                      center_x - radius,
+                      center_y - radius,
+                      center_x + radius,
+                      center_y + radius,
+                  ),
+                  fill=(*color, alpha),
+              )
+
+              glow = glow.filter(
+                  ImageFilter.GaussianBlur(radius // 2)
+              )
+
+              layer.alpha_composite(glow)
+
+          def draw_person_base(
+              canvas,
+              center_x,
+              center_y,
+              scale=1.0,
+              pose="neutral",
+              color=WHITE,
+          ):
+              draw = ImageDraw.Draw(canvas)
+
+              stroke = max(10, int(18 * scale))
+              head_radius = int(52 * scale)
+              torso_length = int(170 * scale)
+              limb_length = int(112 * scale)
+
+              head_x = int(center_x)
+              head_y = int(center_y - torso_length * 0.67)
+
+              # Baş gölgesi
+              draw.ellipse(
+                  (
+                      head_x - head_radius - 8,
+                      head_y - head_radius + 11,
+                      head_x + head_radius + 8,
+                      head_y + head_radius + 27,
+                  ),
+                  fill=(0, 0, 0, 62),
+              )
+
+              draw.ellipse(
+                  (
+                      head_x - head_radius,
+                      head_y - head_radius,
+                      head_x + head_radius,
+                      head_y + head_radius,
+                  ),
+                  fill=color,
+              )
+
+              shoulder_y = int(center_y - torso_length * 0.25)
+              hip_y = int(center_y + torso_length * 0.55)
+
+              # Gövde
+              draw.line(
+                  (
+                      center_x,
+                      shoulder_y,
+                      center_x,
+                      hip_y,
+                  ),
+                  fill=color,
+                  width=stroke,
+              )
+
+              # Pozlara göre kol ve bacaklar
+              if pose == "thinking":
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 70 * scale,
+                          center_y + 20 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 48 * scale,
+                          head_y + 24 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  # Düşünme eli
+                  draw.ellipse(
+                      (
+                          center_x + 34 * scale,
+                          head_y + 7 * scale,
+                          center_x + 64 * scale,
+                          head_y + 37 * scale,
+                      ),
+                      fill=color,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 62 * scale,
+                          hip_y + limb_length * 0.72,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 46 * scale,
+                          hip_y + limb_length * 0.75,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              elif pose == "happy":
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - limb_length * 0.72,
+                          shoulder_y - limb_length * 0.55,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + limb_length * 0.72,
+                          shoulder_y - limb_length * 0.55,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 68 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 68 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              elif pose == "sad":
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 65 * scale,
+                          center_y + 80 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 65 * scale,
+                          center_y + 80 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 44 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 44 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              elif pose == "walking":
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 58 * scale,
+                          center_y + 28 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 62 * scale,
+                          center_y - 16 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 70 * scale,
+                          hip_y + 82 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 90 * scale,
+                          hip_y + 42 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              elif pose == "confident":
+                  # Eller belde
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 78 * scale,
+                          center_y + 22 * scale,
+                          center_x - 44 * scale,
+                          hip_y - 10 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 78 * scale,
+                          center_y + 22 * scale,
+                          center_x + 44 * scale,
+                          hip_y - 10 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 62 * scale,
+                          hip_y + 100 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 62 * scale,
+                          hip_y + 100 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              elif pose == "listening":
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 70 * scale,
+                          center_y + 35 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 54 * scale,
+                          head_y + 8 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 55 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 55 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              elif pose == "talking":
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 75 * scale,
+                          center_y + 20 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 92 * scale,
+                          shoulder_y - 16 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 58 * scale,
+                          hip_y + 96 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 58 * scale,
+                          hip_y + 96 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  # Konuşma çizgileri
+                  for line_index in range(3):
+                      y = int(
+                          head_y - 30 * scale
+                          + line_index * 23 * scale
+                      )
+
+                      draw.line(
+                          (
+                              head_x + 75 * scale,
+                              y,
+                              head_x + (118 + line_index * 8) * scale,
+                              y - 8 * scale,
+                          ),
+                          fill=RED,
+                          width=max(5, int(7 * scale)),
+                      )
+
+              elif pose == "looking_away":
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 62 * scale,
+                          center_y + 50 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 62 * scale,
+                          center_y + 50 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 60 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 60 * scale,
+                          hip_y + 95 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  # Baş yönü
+                  draw.ellipse(
+                      (
+                          head_x + 12 * scale,
+                          head_y - 8 * scale,
+                          head_x + 26 * scale,
+                          head_y + 6 * scale,
+                      ),
+                      fill=NAVY_TOP,
+                  )
+
+              elif pose == "sitting":
+                  seat_y = hip_y + 45 * scale
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 60 * scale,
+                          center_y + 40 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 60 * scale,
+                          center_y + 40 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 85 * scale,
+                          seat_y,
+                          center_x - 95 * scale,
+                          seat_y + 82 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 85 * scale,
+                          seat_y,
+                          center_x + 95 * scale,
+                          seat_y + 82 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              else:
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x - 72 * scale,
+                          center_y + 40 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          shoulder_y,
+                          center_x + 72 * scale,
+                          center_y + 40 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x - 58 * scale,
+                          hip_y + 100 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+                  draw.line(
+                      (
+                          center_x,
+                          hip_y,
+                          center_x + 58 * scale,
+                          hip_y + 100 * scale,
+                      ),
+                      fill=color,
+                      width=stroke,
+                  )
+
+              # Basit yüz
+              eye_y = int(head_y - 10 * scale)
+
+              draw.ellipse(
+                  (
+                      head_x - 26 * scale,
+                      eye_y - 8 * scale,
+                      head_x - 12 * scale,
+                      eye_y + 6 * scale,
+                  ),
+                  fill=NAVY_TOP,
+              )
+
+              draw.ellipse(
+                  (
+                      head_x + 12 * scale,
+                      eye_y - 8 * scale,
+                      head_x + 26 * scale,
+                      eye_y + 6 * scale,
+                  ),
+                  fill=NAVY_TOP,
+              )
+
+              return {
+                  "head_x": head_x,
+                  "head_y": head_y,
+                  "head_radius": head_radius,
+                  "hip_y": hip_y,
+              }
+
+          def draw_heart(
+              draw,
+              center_x,
+              center_y,
+              size,
+              broken=False,
+              color=RED,
+          ):
+              left = center_x - size // 2
+              top = center_y - size // 2
+
+              points = []
+
+              for step in range(0, 361, 4):
+                  angle = math.radians(step)
+                  x = (
+                      16 * math.sin(angle) ** 3
+                  )
+
+                  y = (
+                      13 * math.cos(angle)
+                      - 5 * math.cos(2 * angle)
+                      - 2 * math.cos(3 * angle)
+                      - math.cos(4 * angle)
+                  )
+
+                  points.append(
+                      (
+                          int(center_x + x * size / 34),
+                          int(center_y - y * size / 34),
+                      )
+                  )
+
+              draw.polygon(points, fill=color)
+
+              if broken:
+                  crack = [
+                      (center_x - 6, top + size * 0.16),
+                      (center_x + 18, top + size * 0.34),
+                      (center_x - 13, top + size * 0.52),
+                      (center_x + 11, top + size * 0.70),
+                      (center_x - 7, top + size * 0.88),
+                  ]
+
+                  draw.line(
+                      crack,
+                      fill=NAVY_BOTTOM,
+                      width=max(8, size // 24),
+                  )
+
+          def draw_eye(draw, center_x, center_y, size):
+              draw.ellipse(
+                  (
+                      center_x - size,
+                      center_y - size * 0.55,
+                      center_x + size,
+                      center_y + size * 0.55,
+                  ),
+                  fill=WHITE,
+              )
+
+              draw.ellipse(
+                  (
+                      center_x - size * 0.38,
+                      center_y - size * 0.38,
+                      center_x + size * 0.38,
+                      center_y + size * 0.38,
+                  ),
+                  fill=RED,
+              )
+
+              draw.ellipse(
+                  (
+                      center_x - size * 0.17,
+                      center_y - size * 0.17,
+                      center_x + size * 0.17,
+                      center_y + size * 0.17,
+                  ),
+                  fill=NAVY_TOP,
+              )
+
+              draw.ellipse(
+                  (
+                      center_x - size * 0.07,
+                      center_y - size * 0.12,
+                      center_x,
+                      center_y - size * 0.05,
+                  ),
+                  fill=WHITE,
+              )
+
+          def draw_brain(draw, center_x, center_y, size):
+              radius = size // 5
+
+              offsets = [
+                  (-2, -1),
+                  (-1, -2),
+                  (0, -2),
+                  (1, -2),
+                  (2, -1),
+                  (-2, 0),
+                  (-1, 0),
+                  (0, 0),
+                  (1, 0),
+                  (2, 0),
+                  (-2, 1),
+                  (-1, 2),
+                  (0, 2),
+                  (1, 2),
+                  (2, 1),
+              ]
+
+              for ox, oy in offsets:
+                  x = center_x + ox * radius * 0.72
+                  y = center_y + oy * radius * 0.61
+
+                  draw.ellipse(
+                      (
+                          x - radius,
+                          y - radius,
+                          x + radius,
+                          y + radius,
+                      ),
+                      fill=WHITE,
+                  )
+
+              draw.line(
+                  (
+                      center_x,
+                      center_y - size * 0.36,
+                      center_x,
+                      center_y + size * 0.36,
+                  ),
+                  fill=RED,
+                  width=max(8, size // 22),
+              )
+
+          def draw_ear(draw, center_x, center_y, size):
+              draw.arc(
+                  (
+                      center_x - size * 0.55,
+                      center_y - size,
+                      center_x + size * 0.55,
+                      center_y + size,
+                  ),
+                  start=65,
+                  end=300,
+                  fill=WHITE,
+                  width=max(18, size // 8),
+              )
+
+              draw.arc(
+                  (
+                      center_x - size * 0.20,
+                      center_y - size * 0.45,
+                      center_x + size * 0.24,
+                      center_y + size * 0.40,
+                  ),
+                  start=75,
+                  end=280,
+                  fill=RED,
+                  width=max(10, size // 13),
+              )
+
+          def draw_phone(draw, center_x, center_y, size):
+              width = size * 0.58
+              height = size
+
+              draw.rounded_rectangle(
+                  (
+                      center_x - width / 2,
+                      center_y - height / 2,
+                      center_x + width / 2,
+                      center_y + height / 2,
+                  ),
+                  radius=int(size * 0.11),
+                  outline=WHITE,
+                  width=max(16, int(size * 0.07)),
+                  fill=(255, 255, 255, 24),
+              )
+
+              draw.ellipse(
+                  (
+                      center_x - 8,
+                      center_y + height / 2 - 30,
+                      center_x + 8,
+                      center_y + height / 2 - 14,
+                  ),
+                  fill=RED,
+              )
+
+          def draw_message(draw, center_x, center_y, size):
+              draw.rounded_rectangle(
+                  (
+                      center_x - size,
+                      center_y - size * 0.55,
+                      center_x + size,
+                      center_y + size * 0.55,
+                  ),
+                  radius=int(size * 0.25),
+                  fill=WHITE,
+              )
+
+              draw.polygon(
                   [
-                      "ffmpeg",
-                      "-y",
-                      "-loop", "1",
-                      "-i", image_path,
-                      "-vf", video_filter,
-                      "-t", str(duration),
-                      "-an",
-                      "-c:v", "libx264",
-                      "-preset", "fast",
-                      "-crf", "23",
-                      "-pix_fmt", "yuv420p",
-                      output_path
+                      (
+                          center_x - size * 0.45,
+                          center_y + size * 0.45,
+                      ),
+                      (
+                          center_x - size * 0.12,
+                          center_y + size * 0.85,
+                      ),
+                      (
+                          center_x - size * 0.05,
+                          center_y + size * 0.45,
+                      ),
                   ],
-                  check=True
+                  fill=WHITE,
               )
 
-              output_files.append(output_path)
+              for index in range(3):
+                  x = center_x - size * 0.45 + index * size * 0.45
 
-          with open("concat.txt", "w", encoding="utf-8") as f:
-              for path in output_files:
-                  f.write(f"file '{path}'\n")
+                  draw.ellipse(
+                      (
+                          x - size * 0.08,
+                          center_y - size * 0.08,
+                          x + size * 0.08,
+                          center_y + size * 0.08,
+                      ),
+                      fill=RED,
+                  )
 
-          subprocess.run(
+          def draw_clock(draw, center_x, center_y, size):
+              draw.ellipse(
+                  (
+                      center_x - size,
+                      center_y - size,
+                      center_x + size,
+                      center_y + size,
+                  ),
+                  outline=WHITE,
+                  width=max(16, size // 10),
+                  fill=(255, 255, 255, 20),
+              )
+
+              draw.line(
+                  (
+                      center_x,
+                      center_y,
+                      center_x,
+                      center_y - size * 0.53,
+                  ),
+                  fill=RED,
+                  width=max(12, size // 12),
+              )
+
+              draw.line(
+                  (
+                      center_x,
+                      center_y,
+                      center_x + size * 0.42,
+                      center_y + size * 0.20,
+                  ),
+                  fill=WHITE,
+                  width=max(12, size // 12),
+              )
+
+          def draw_lock(draw, center_x, center_y, size):
+              body_width = size * 1.2
+              body_height = size * 0.88
+
+              draw.rounded_rectangle(
+                  (
+                      center_x - body_width / 2,
+                      center_y - body_height * 0.15,
+                      center_x + body_width / 2,
+                      center_y + body_height,
+                  ),
+                  radius=int(size * 0.13),
+                  fill=WHITE,
+              )
+
+              draw.arc(
+                  (
+                      center_x - size * 0.43,
+                      center_y - size * 0.86,
+                      center_x + size * 0.43,
+                      center_y + size * 0.16,
+                  ),
+                  start=180,
+                  end=360,
+                  fill=WHITE,
+                  width=max(18, size // 9),
+              )
+
+              draw.ellipse(
+                  (
+                      center_x - size * 0.11,
+                      center_y + size * 0.25,
+                      center_x + size * 0.11,
+                      center_y + size * 0.47,
+                  ),
+                  fill=RED,
+              )
+
+          def draw_key(draw, center_x, center_y, size):
+              draw.ellipse(
+                  (
+                      center_x - size,
+                      center_y - size * 0.55,
+                      center_x - size * 0.10,
+                      center_y + size * 0.35,
+                  ),
+                  outline=WHITE,
+                  width=max(16, size // 9),
+              )
+
+              draw.line(
+                  (
+                      center_x - size * 0.12,
+                      center_y - size * 0.10,
+                      center_x + size,
+                      center_y + size * 0.50,
+                  ),
+                  fill=WHITE,
+                  width=max(18, size // 8),
+              )
+
+              draw.line(
+                  (
+                      center_x + size * 0.60,
+                      center_y + size * 0.26,
+                      center_x + size * 0.42,
+                      center_y + size * 0.62,
+                  ),
+                  fill=RED,
+                  width=max(14, size // 10),
+              )
+
+              draw.line(
+                  (
+                      center_x + size * 0.82,
+                      center_y + size * 0.38,
+                      center_x + size * 0.64,
+                      center_y + size * 0.74,
+                  ),
+                  fill=RED,
+                  width=max(14, size // 10),
+              )
+
+          def draw_warning(draw, center_x, center_y, size):
+              draw.polygon(
+                  [
+                      (center_x, center_y - size),
+                      (center_x - size, center_y + size * 0.78),
+                      (center_x + size, center_y + size * 0.78),
+                  ],
+                  fill=WHITE,
+              )
+
+              draw.line(
+                  (
+                      center_x,
+                      center_y - size * 0.38,
+                      center_x,
+                      center_y + size * 0.25,
+                  ),
+                  fill=RED,
+                  width=max(18, size // 8),
+              )
+
+              draw.ellipse(
+                  (
+                      center_x - size * 0.08,
+                      center_y + size * 0.42,
+                      center_x + size * 0.08,
+                      center_y + size * 0.58,
+                  ),
+                  fill=RED,
+              )
+
+          def draw_question(draw, center_x, center_y, size):
+              question_font = ImageFont.truetype(
+                  FONT_BOLD,
+                  int(size * 2.2)
+              )
+
+              bbox = draw.textbbox(
+                  (0, 0),
+                  "?",
+                  font=question_font
+              )
+
+              draw.text(
+                  (
+                      center_x - (bbox[2] - bbox[0]) / 2,
+                      center_y - (bbox[3] - bbox[1]) / 2 - size * 0.25,
+                  ),
+                  "?",
+                  font=question_font,
+                  fill=WHITE,
+                  stroke_width=max(4, size // 25),
+                  stroke_fill=RED_DARK,
+              )
+
+          def draw_footsteps(draw, center_x, center_y, size):
+              for index in range(5):
+                  offset_x = (index - 2) * size * 0.34
+                  offset_y = (index % 2) * size * 0.28
+
+                  draw.ellipse(
+                      (
+                          center_x + offset_x - size * 0.17,
+                          center_y + offset_y - size * 0.38,
+                          center_x + offset_x + size * 0.17,
+                          center_y + offset_y + size * 0.38,
+                      ),
+                      fill=WHITE if index % 2 == 0 else RED,
+                  )
+
+          def draw_handshake(draw, center_x, center_y, size):
+              draw.line(
+                  (
+                      center_x - size,
+                      center_y - size * 0.55,
+                      center_x - size * 0.18,
+                      center_y,
+                  ),
+                  fill=WHITE,
+                  width=max(30, size // 5),
+              )
+
+              draw.line(
+                  (
+                      center_x + size,
+                      center_y - size * 0.55,
+                      center_x + size * 0.18,
+                      center_y,
+                  ),
+                  fill=WHITE,
+                  width=max(30, size // 5),
+              )
+
+              draw.rounded_rectangle(
+                  (
+                      center_x - size * 0.30,
+                      center_y - size * 0.20,
+                      center_x + size * 0.30,
+                      center_y + size * 0.22,
+                  ),
+                  radius=int(size * 0.12),
+                  fill=RED,
+              )
+
+          def draw_two_people(
+              layer,
+              center_x,
+              center_y,
+              size,
+              mode="close",
+          ):
+              distance = size * (0.48 if mode == "close" else 0.82)
+
+              draw_person_base(
+                  layer,
+                  center_x - distance,
+                  center_y,
+                  scale=size / 420,
+                  pose="neutral",
+              )
+
+              draw_person_base(
+                  layer,
+                  center_x + distance,
+                  center_y,
+                  scale=size / 420,
+                  pose="neutral",
+              )
+
+              draw = ImageDraw.Draw(layer)
+
+              if mode == "close":
+                  draw_heart(
+                      draw,
+                      center_x,
+                      center_y - size * 0.55,
+                      int(size * 0.45),
+                      color=RED,
+                  )
+
+              elif mode == "apart":
+                  draw.line(
+                      (
+                          center_x,
+                          center_y - size * 0.75,
+                          center_x,
+                          center_y + size * 0.70,
+                      ),
+                      fill=RED,
+                      width=max(8, int(size * 0.035)),
+                  )
+
+              elif mode == "talking":
+                  draw_message(
+                      draw,
+                      center_x,
+                      center_y - size * 0.56,
+                      size * 0.38,
+                  )
+
+          def draw_visual(
+              visual_key,
+              animation_progress,
+              scene_progress,
+              scene_number,
+          ):
+              layer = Image.new(
+                  "RGBA",
+                  (WIDTH, HEIGHT),
+                  (0, 0, 0, 0)
+              )
+
+              base_x = WIDTH // 2
+              base_y = int(HEIGHT * 0.44)
+              base_scale = 1.0
+              rotation = 0
+              opacity = 255
+
+              if animation_progress < 0.20:
+                  intro = animation_progress / 0.20
+              else:
+                  intro = 1.0
+
+              # Sahne animasyonu
+              animation = scenes[scene_number - 1].get(
+                  "animation",
+                  "fade_in"
+              )
+
+              if animation == "fade_in":
+                  opacity = int(255 * ease_in_out(intro))
+
+              elif animation == "pop":
+                  base_scale *= max(
+                      0.01,
+                      ease_out_back(intro)
+                  )
+
+              elif animation == "slide_left":
+                  base_x += int((1 - ease_in_out(intro)) * WIDTH * 0.42)
+
+              elif animation == "slide_right":
+                  base_x -= int((1 - ease_in_out(intro)) * WIDTH * 0.42)
+
+              elif animation == "slow_zoom":
+                  base_scale *= 0.94 + scene_progress * 0.12
+
+              elif animation == "pulse":
+                  base_scale *= 1.0 + math.sin(
+                      scene_progress * math.pi * 6
+                  ) * 0.055
+
+              elif animation == "shake":
+                  base_x += int(
+                      math.sin(scene_progress * math.pi * 22) * 9
+                  )
+
+              elif animation == "float":
+                  base_y += int(
+                      math.sin(scene_progress * math.pi * 4) * 18
+                  )
+
+              elif animation == "bounce":
+                  base_y -= int(
+                      abs(
+                          math.sin(scene_progress * math.pi * 5)
+                      ) * 25
+                  )
+
+              draw_glow_circle(
+                  layer,
+                  base_x,
+                  base_y,
+                  165,
+                  BLUE_GLOW,
+                  alpha=52,
+              )
+
+              draw = ImageDraw.Draw(layer)
+
+              if visual_key == "mindy_thinking":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 20,
+                      scale=1.06 * base_scale,
+                      pose="thinking",
+                  )
+
+                  # Düşünce baloncukları
+                  draw.ellipse(
+                      (
+                          base_x + 100 * base_scale,
+                          base_y - 210 * base_scale,
+                          base_x + 128 * base_scale,
+                          base_y - 182 * base_scale,
+                      ),
+                      fill=WHITE,
+                  )
+
+                  draw.ellipse(
+                      (
+                          base_x + 130 * base_scale,
+                          base_y - 255 * base_scale,
+                          base_x + 176 * base_scale,
+                          base_y - 209 * base_scale,
+                      ),
+                      fill=WHITE,
+                  )
+
+                  draw_question(
+                      draw,
+                      int(base_x + 214 * base_scale),
+                      int(base_y - 315 * base_scale),
+                      int(55 * base_scale),
+                  )
+
+              elif visual_key == "mindy_sad":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 30,
+                      scale=1.04 * base_scale,
+                      pose="sad",
+                  )
+
+                  # Yaş damlası
+                  draw.ellipse(
+                      (
+                          base_x + 32 * base_scale,
+                          base_y - 160 * base_scale,
+                          base_x + 52 * base_scale,
+                          base_y - 126 * base_scale,
+                      ),
+                      fill=(95, 185, 255),
+                  )
+
+              elif visual_key == "mindy_happy":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 10,
+                      scale=1.02 * base_scale,
+                      pose="happy",
+                  )
+
+                  for sparkle_index in range(8):
+                      angle = sparkle_index * math.pi / 4
+                      sx = base_x + math.cos(angle) * 205 * base_scale
+                      sy = base_y + math.sin(angle) * 170 * base_scale
+
+                      draw.ellipse(
+                          (
+                              sx - 7,
+                              sy - 7,
+                              sx + 7,
+                              sy + 7,
+                          ),
+                          fill=RED if sparkle_index % 2 else WHITE,
+                      )
+
+              elif visual_key == "mindy_walking":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 10,
+                      scale=1.03 * base_scale,
+                      pose="walking",
+                  )
+
+                  draw_footsteps(
+                      draw,
+                      base_x - 160,
+                      base_y + 260,
+                      95,
+                  )
+
+              elif visual_key == "mindy_sitting":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y - 10,
+                      scale=1.0 * base_scale,
+                      pose="sitting",
+                  )
+
+              elif visual_key == "mindy_confident":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 10,
+                      scale=1.04 * base_scale,
+                      pose="confident",
+                  )
+
+                  draw.polygon(
+                      [
+                          (base_x - 84, base_y - 105),
+                          (base_x - 184, base_y + 62),
+                          (base_x - 72, base_y + 8),
+                      ],
+                      fill=RED,
+                  )
+
+              elif visual_key == "mindy_listening":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 10,
+                      scale=1.04 * base_scale,
+                      pose="listening",
+                  )
+
+                  draw_ear(
+                      draw,
+                      base_x + 155,
+                      base_y - 110,
+                      70,
+                  )
+
+              elif visual_key == "mindy_talking":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 10,
+                      scale=1.04 * base_scale,
+                      pose="talking",
+                  )
+
+                  draw_message(
+                      draw,
+                      base_x + 180,
+                      base_y - 205,
+                      78,
+                  )
+
+              elif visual_key == "mindy_looking_away":
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 10,
+                      scale=1.04 * base_scale,
+                      pose="looking_away",
+                  )
+
+              elif visual_key == "two_people_close":
+                  draw_two_people(
+                      layer,
+                      base_x,
+                      base_y + 25,
+                      300 * base_scale,
+                      mode="close",
+                  )
+
+              elif visual_key == "two_people_apart":
+                  draw_two_people(
+                      layer,
+                      base_x,
+                      base_y + 25,
+                      285 * base_scale,
+                      mode="apart",
+                  )
+
+              elif visual_key == "two_people_talking":
+                  draw_two_people(
+                      layer,
+                      base_x,
+                      base_y + 25,
+                      285 * base_scale,
+                      mode="talking",
+                  )
+
+              elif visual_key == "heart_broken":
+                  draw_heart(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(330 * base_scale),
+                      broken=True,
+                  )
+
+              elif visual_key == "heart_full":
+                  draw_heart(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(330 * base_scale),
+                      broken=False,
+                  )
+
+                  draw_glow_circle(
+                      layer,
+                      base_x,
+                      base_y,
+                      int(185 * base_scale),
+                      RED,
+                      alpha=50,
+                  )
+
+              elif visual_key == "brain_thinking":
+                  draw_brain(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(340 * base_scale),
+                  )
+
+              elif visual_key == "eye_looking":
+                  draw_eye(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(220 * base_scale),
+                  )
+
+              elif visual_key == "ear_listening":
+                  draw_ear(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(230 * base_scale),
+                  )
+
+              elif visual_key == "phone":
+                  draw_phone(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(315 * base_scale),
+                  )
+
+              elif visual_key == "message_bubble":
+                  draw_message(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(230 * base_scale),
+                  )
+
+              elif visual_key == "clock":
+                  draw_clock(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(210 * base_scale),
+                  )
+
+              elif visual_key == "lock":
+                  draw_lock(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(205 * base_scale),
+                  )
+
+              elif visual_key == "key":
+                  draw_key(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(190 * base_scale),
+                  )
+
+              elif visual_key == "warning":
+                  draw_warning(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(225 * base_scale),
+                  )
+
+              elif visual_key == "question":
+                  draw_question(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(165 * base_scale),
+                  )
+
+              elif visual_key == "footsteps":
+                  draw_footsteps(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(190 * base_scale),
+                  )
+
+              elif visual_key == "handshake":
+                  draw_handshake(
+                      draw,
+                      base_x,
+                      base_y,
+                      int(185 * base_scale),
+                  )
+
+              else:
+                  draw_person_base(
+                      layer,
+                      base_x,
+                      base_y + 20,
+                      scale=1.06 * base_scale,
+                      pose="thinking",
+                  )
+
+              if opacity < 255:
+                  alpha = layer.getchannel("A")
+                  alpha = alpha.point(
+                      lambda value: int(value * opacity / 255)
+                  )
+                  layer.putalpha(alpha)
+
+              return layer
+
+          def split_words(text):
+              return text.strip().split()
+
+          def wrap_words(draw, words, font, max_width):
+              lines = []
+              current = []
+
+              for word in words:
+                  candidate = current + [word]
+                  candidate_text = " ".join(candidate)
+
+                  box = draw.textbbox(
+                      (0, 0),
+                      candidate_text,
+                      font=font,
+                  )
+
+                  if box[2] - box[0] <= max_width:
+                      current = candidate
+                  else:
+                      if current:
+                          lines.append(current)
+                      current = [word]
+
+              if current:
+                  lines.append(current)
+
+              return lines
+
+          def draw_text_with_highlight(
+              draw,
+              text,
+              highlight,
+              scene_progress,
+          ):
+              words = split_words(text)
+
+              # Uzun cümlede daha küçük font.
+              font = body_font if len(text) <= 78 else body_font_small
+              max_width = WIDTH - 100
+              lines = wrap_words(
+                  draw,
+                  words,
+                  font,
+                  max_width,
+              )
+
+              line_height = font.size + 18
+              total_height = len(lines) * line_height
+
+              start_y = int(HEIGHT * 0.70 - total_height / 2)
+
+              # Yarı saydam metin kartı
+              card_top = start_y - 34
+              card_bottom = start_y + total_height + 27
+
+              draw.rounded_rectangle(
+                  (
+                      34,
+                      card_top,
+                      WIDTH - 34,
+                      card_bottom,
+                  ),
+                  radius=34,
+                  fill=(2, 12, 39, 160),
+                  outline=(255, 255, 255, 30),
+                  width=2,
+              )
+
+              lowered_highlight = highlight.casefold().strip()
+
+              for line_index, line_words in enumerate(lines):
+                  widths = []
+
+                  for word in line_words:
+                      box = draw.textbbox(
+                          (0, 0),
+                          word,
+                          font=font,
+                      )
+                      widths.append(box[2] - box[0])
+
+                  space_box = draw.textbbox(
+                      (0, 0),
+                      " ",
+                      font=font,
+                  )
+                  space_width = space_box[2] - space_box[0]
+
+                  line_width = (
+                      sum(widths)
+                      + space_width * max(0, len(line_words) - 1)
+                  )
+
+                  x = int((WIDTH - line_width) / 2)
+                  y = start_y + line_index * line_height
+
+                  for word_index, word in enumerate(line_words):
+                      clean_word = word.strip(
+                          ".,!?;:()[]{}\"'“”"
+                      )
+
+                      is_highlight = (
+                          clean_word.casefold()
+                          == lowered_highlight
+                      )
+
+                      color = RED if is_highlight else WHITE
+
+                      # Hafif gölge
+                      draw.text(
+                          (x + 3, y + 4),
+                          word,
+                          font=font,
+                          fill=(0, 0, 0, 130),
+                      )
+
+                      draw.text(
+                          (x, y),
+                          word,
+                          font=font,
+                          fill=color,
+                      )
+
+                      if is_highlight:
+                          underline_y = y + font.size + 6
+
+                          pulse = (
+                              0.65
+                              + 0.35
+                              * (
+                                  0.5
+                                  + 0.5
+                                  * math.sin(
+                                      scene_progress
+                                      * math.pi
+                                      * 4
+                                  )
+                              )
+                          )
+
+                          draw.rounded_rectangle(
+                              (
+                                  x,
+                                  underline_y,
+                                  x + widths[word_index],
+                                  underline_y + 7,
+                              ),
+                              radius=3,
+                              fill=(
+                                  RED[0],
+                                  RED[1],
+                                  RED[2],
+                                  int(255 * pulse),
+                              ),
+                          )
+
+                      x += widths[word_index] + space_width
+
+          # Global video pipeline
+          ffmpeg = subprocess.Popen(
               [
                   "ffmpeg",
                   "-y",
-                  "-f", "concat",
-                  "-safe", "0",
-                  "-i", "concat.txt",
-                  "-c", "copy",
-                  "visuals.mp4"
+                  "-f", "rawvideo",
+                  "-pix_fmt", "rgb24",
+                  "-s", f"{WIDTH}x{HEIGHT}",
+                  "-r", str(FPS),
+                  "-i", "-",
+                  "-an",
+                  "-c:v", "libx264",
+                  "-preset", "fast",
+                  "-crf", "20",
+                  "-pix_fmt", "yuv420p",
+                  "visuals_720x1280.mp4",
               ],
-              check=True
+              stdin=subprocess.PIPE,
           )
+
+          total_frames = int(round(audio_duration * FPS))
+          frame_cursor = 0
+
+          scene_frame_counts = [
+              max(1, int(round(duration * FPS)))
+              for duration in scene_durations
+          ]
+
+          # Tam frame sayısını son sahneye eşitle.
+          scene_frame_counts[-1] += (
+              total_frames - sum(scene_frame_counts)
+          )
+
+          for scene_index, scene in enumerate(scenes):
+              scene_frames = scene_frame_counts[scene_index]
+
+              for local_frame in range(scene_frames):
+                  global_progress = (
+                      frame_cursor / max(1, total_frames - 1)
+                  )
+
+                  scene_progress = (
+                      local_frame / max(1, scene_frames - 1)
+                  )
+
+                  base = create_gradient()
+                  draw = ImageDraw.Draw(base, "RGBA")
+
+                  draw_particles(
+                      draw,
+                      frame_cursor,
+                      scene_index + 1,
+                  )
+
+                  draw_wave_lines(
+                      draw,
+                      frame_cursor,
+                  )
+
+                  draw_brand(
+                      draw,
+                      scene_index + 1,
+                  )
+
+                  visual = draw_visual(
+                      scene.get(
+                          "visual_key",
+                          "mindy_thinking"
+                      ),
+                      scene_progress,
+                      scene_progress,
+                      scene_index + 1,
+                  )
+
+                  base.alpha_composite(visual)
+
+                  draw = ImageDraw.Draw(base, "RGBA")
+
+                  draw_text_with_highlight(
+                      draw,
+                      str(scene.get("text", "")),
+                      str(scene.get("highlight", "")),
+                      scene_progress,
+                  )
+
+                  draw_progress(
+                      draw,
+                      global_progress,
+                  )
+
+                  draw_vignette(base)
+
+                  frame = base.convert("RGB")
+
+                  ffmpeg.stdin.write(frame.tobytes())
+                  frame_cursor += 1
+
+          ffmpeg.stdin.close()
+          return_code = ffmpeg.wait()
+
+          if return_code != 0:
+              raise RuntimeError(
+                  f"FFmpeg render hatası. Kod: {return_code}"
+              )
+
+          print("Render tamamlandı.")
+          print("Ses süresi:", audio_duration)
+          print("Toplam frame:", frame_cursor)
           PY
 
-      - name: Görüntü ve sesi birleştir
+      - name: Görüntüyü 1080x1920 yükselt
+        run: |
+          ffmpeg -y \
+            -i visuals_720x1280.mp4 \
+            -vf "scale=1080:1920:flags=lanczos" \
+            -c:v libx264 \
+            -preset fast \
+            -crf 19 \
+            -pix_fmt yuv420p \
+            visuals.mp4
+
+      - name: Ses, müzik ve görüntüyü birleştir
         run: |
           ffmpeg -y \
             -i visuals.mp4 \
             -i voice.mp3 \
+            -i music.m4a \
+            -filter_complex "\
+              [1:a]volume=1.0[voice];\
+              [2:a]volume=0.35[music];\
+              [voice][music]amix=inputs=2:duration=first:dropout_transition=2[audio]" \
             -map 0:v:0 \
-            -map 1:a:0 \
+            -map "[audio]" \
             -c:v copy \
             -c:a aac \
             -b:a 192k \
             -shortest \
             final-video.mp4
 
-      - name: Son videoyu kaydet
+      - name: Video bilgilerini göster
+        run: |
+          ffprobe -v error \
+            -show_entries format=duration,size \
+            -show_entries stream=codec_name,width,height,r_frame_rate \
+            -of default=noprint_wrappers=1 \
+            final-video.mp4
+
+      - name: Son videoyu artifact olarak kaydet
         uses: actions/upload-artifact@v4
         with:
           name: final-youtube-video
           path: final-video.mp4
           retention-days: 7
+          if-no-files-found: error
